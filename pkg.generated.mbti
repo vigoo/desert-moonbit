@@ -1,0 +1,347 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vigoo/desert"
+
+import {
+  "moonbitlang/core/buffer",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/hashmap",
+  "moonbitlang/core/hashset",
+}
+
+// Values
+pub fn compress_bytes(Bytes) -> Bytes raise DesertFailure
+
+pub fn decompress_bytes(Bytes) -> Bytes raise DesertFailure
+
+pub fn[T : BinaryDeserializer] deserialize(Bytes, options? : Options) -> T raise DesertFailure
+
+pub fn[T : BinaryDeserializer] deserialize_exhaustive(Bytes, options? : Options) -> T raise DesertFailure
+
+pub fn deserialize_unknown_from_bytes(Bytes, TypeRegistry, options? : Options) -> RegisteredBox raise DesertFailure
+
+pub fn golden_dataset1() -> Bytes
+
+pub fn read_utf8(BytesView) -> String raise DesertFailure
+
+pub fn[T : BinarySerializer] serialize_to_bytes(T, options? : Options) -> Bytes raise DesertFailure
+
+pub fn[T : BinarySerializer] serialize_to_output(T, ByteOutput, options? : Options) -> Unit raise DesertFailure
+
+pub fn[T : RegisteredValue] serialize_unknown_to_bytes(T, TypeRegistry, options? : Options) -> Bytes raise DesertFailure
+
+pub fn[T : BinarySerializer] serialized_size(T, options? : Options) -> Int32 raise DesertFailure
+
+pub fn utf8_byte_length(String) -> Int32
+
+pub fn write_utf8(String, FixedArray[Byte], Int32) -> Int32
+
+// Errors
+#derive(@debug.Debug)
+pub(all) suberror DesertFailure {
+  FailedToReadInput(String)
+  InputEndedUnexpectedly
+  FailedToWriteOutput(String)
+  SerializationFailure(String)
+  DeserializationFailure(String)
+  DeserializingNonExistingChunk(Int32)
+  NonOptionalFieldSerializedAsNone(String)
+  UnknownFieldReferenceInEvolutionStep(String)
+  UnknownSerializedEvolutionStep(Int32)
+  InvalidStringId(Int32)
+  FieldRemovedInSerializedVersion(String)
+  FieldWithoutDefaultValueIsMissing(String)
+  TypeNotRegistered(String)
+  InvalidTypeId(Int32)
+  SerializationUpcastError(String, String, String)
+  InvalidConstructorName(String, String)
+  InvalidConstructorId(Int32, String)
+  InvalidRefId(Int32)
+  SerializingTransientConstructor(String)
+  UnsupportedCharacter(Char)
+  FailedToDecodeCharacter(UInt16)
+}
+pub fn DesertFailure::message(Self) -> String
+pub fn DesertFailure::output(Self, &Logger) -> Unit
+pub fn DesertFailure::to_repr(Self) -> @debug.Repr
+pub fn DesertFailure::to_string(Self) -> String
+pub impl Show for DesertFailure
+
+// Types and methods
+pub struct AdtMetadata {
+  version : Int32
+  field_generations : @hashmap.HashMap[String, Int32]
+  made_optional_at : @hashmap.HashMap[String, Int32]
+  removed_fields : @hashmap.HashMap[String, Bool]
+  evolution_steps : Array[Evolution]
+  contains_field_made_optional : Bool
+}
+pub fn AdtMetadata::new(Array[Evolution]) -> Self
+
+pub struct AdtReader {
+  // private fields
+}
+pub fn AdtReader::new(AdtMetadata, DeserializationContext, Int32) -> Self raise DesertFailure
+pub fn AdtReader::new_v0(AdtMetadata, DeserializationContext) -> Self
+pub fn AdtReader::read_constructor_idx(Self) -> Int32 raise DesertFailure
+pub fn[T : BinaryDeserializer] AdtReader::read_field(Self, String, T?) -> T raise DesertFailure
+pub fn[T : BinaryDeserializer] AdtReader::read_optional_field(Self, String, T??) -> T? raise DesertFailure
+
+pub struct AdtWriter {
+  // private fields
+}
+pub fn AdtWriter::finish(Self) -> Unit raise DesertFailure
+pub fn AdtWriter::new(AdtMetadata, SerializationContext) -> Self raise DesertFailure
+pub fn AdtWriter::new_v0(AdtMetadata, SerializationContext) -> Self raise DesertFailure
+pub fn AdtWriter::write_constructor(Self, UInt32, (SerializationContext) -> Unit raise DesertFailure) -> Unit raise DesertFailure
+pub fn[T : BinarySerializer] AdtWriter::write_field(Self, String, T) -> Unit raise DesertFailure
+
+pub struct BinaryInput {
+  data : Bytes
+  // private fields
+}
+pub fn BinaryInput::is_empty(Self) -> Bool
+pub fn BinaryInput::new(Bytes) -> Self
+pub fn BinaryInput::pop_region(Self) -> (Int32, Int32)
+pub fn BinaryInput::position(Self) -> Int32
+pub fn BinaryInput::push_region(Self, Int32, Int32) -> Unit
+pub fn BinaryInput::read_bytes(Self, Int32) -> Bytes raise DesertFailure
+pub fn BinaryInput::read_bytes_view(Self, Int32) -> BytesView raise DesertFailure
+pub fn BinaryInput::read_f32(Self) -> Float raise DesertFailure
+pub fn BinaryInput::read_f64(Self) -> Double raise DesertFailure
+pub fn BinaryInput::read_i16(Self) -> Int32 raise DesertFailure
+pub fn BinaryInput::read_i32(Self) -> Int32 raise DesertFailure
+pub fn BinaryInput::read_i64(Self) -> Int64 raise DesertFailure
+pub fn BinaryInput::read_i8(Self) -> Int32 raise DesertFailure
+pub fn BinaryInput::read_u16(Self) -> UInt16 raise DesertFailure
+pub fn BinaryInput::read_u32(Self) -> UInt32 raise DesertFailure
+pub fn BinaryInput::read_u64(Self) -> UInt64 raise DesertFailure
+pub fn BinaryInput::read_u8(Self) -> Byte raise DesertFailure
+pub fn BinaryInput::read_var_i32(Self) -> Int32 raise DesertFailure
+pub fn BinaryInput::read_var_u32(Self) -> UInt32 raise DesertFailure
+pub fn BinaryInput::remaining(Self) -> Int32
+pub fn BinaryInput::seek(Self, Int32) -> Unit raise DesertFailure
+pub fn BinaryInput::seek_internal(Self, Int32) -> Unit
+
+pub struct ByteOutput {
+  buffer : @buffer.Buffer
+}
+pub fn ByteOutput::length(Self) -> Int32
+pub fn ByteOutput::new(capacity? : Int32) -> Self
+pub fn ByteOutput::to_bytes(Self) -> Bytes
+pub fn ByteOutput::write_bytes(Self, BytesView) -> Unit raise DesertFailure
+pub fn ByteOutput::write_f32(Self, Float) -> Unit raise DesertFailure
+pub fn ByteOutput::write_f64(Self, Double) -> Unit raise DesertFailure
+pub fn ByteOutput::write_i16(Self, Int32) -> Unit raise DesertFailure
+pub fn ByteOutput::write_i32(Self, Int32) -> Unit raise DesertFailure
+pub fn ByteOutput::write_i64(Self, Int64) -> Unit raise DesertFailure
+pub fn ByteOutput::write_i8(Self, Int32) -> Unit raise DesertFailure
+pub fn ByteOutput::write_u16(Self, UInt16) -> Unit raise DesertFailure
+pub fn ByteOutput::write_u32(Self, UInt32) -> Unit raise DesertFailure
+pub fn ByteOutput::write_u64(Self, UInt64) -> Unit raise DesertFailure
+pub fn ByteOutput::write_u8(Self, Byte) -> Unit raise DesertFailure
+pub fn ByteOutput::write_var_i32(Self, Int32) -> Unit raise DesertFailure
+pub fn ByteOutput::write_var_u32(Self, UInt32) -> Unit raise DesertFailure
+pub impl BinaryOutput for ByteOutput
+
+#derive(Eq, @debug.Debug)
+pub struct DeduplicatedString {
+  string : String
+}
+pub fn DeduplicatedString::deserialize(DeserializationContext) -> Self raise DesertFailure
+pub fn DeduplicatedString::equal(Self, Self) -> Bool
+pub fn DeduplicatedString::get(Self) -> String
+pub fn DeduplicatedString::new(String) -> Self
+pub fn DeduplicatedString::not_equal(Self, Self) -> Bool
+pub fn DeduplicatedString::serialize(Self, SerializationContext) -> Unit raise DesertFailure
+pub fn DeduplicatedString::to_repr(Self) -> @debug.Repr
+pub impl BinaryDeserializer for DeduplicatedString
+pub impl BinarySerializer for DeduplicatedString
+
+pub struct DeserializationContext {
+  input : BinaryInput
+  state : SerializerState
+  options : Options
+}
+pub fn DeserializationContext::new(BinaryInput, SerializerState, Options) -> Self
+pub fn DeserializationContext::pop_region(Self) -> (Int32, Int32)
+pub fn DeserializationContext::pos(Self) -> Int32
+pub fn DeserializationContext::push_region(Self, Int32, Int32) -> Unit
+pub fn[T : BinaryDeserializer] DeserializationContext::read(Self) -> T raise DesertFailure
+pub fn DeserializationContext::read_bytes(Self, Int32) -> Bytes raise DesertFailure
+pub fn DeserializationContext::read_bytes_view(Self, Int32) -> BytesView raise DesertFailure
+pub fn DeserializationContext::read_compressed(Self) -> Bytes raise DesertFailure
+pub fn DeserializationContext::read_f32(Self) -> Float raise DesertFailure
+pub fn DeserializationContext::read_f64(Self) -> Double raise DesertFailure
+pub fn[T : BinaryDeserializer] DeserializationContext::read_flexible_array(Self) -> Array[T] raise DesertFailure
+pub fn DeserializationContext::read_i16(Self) -> Int32 raise DesertFailure
+pub fn DeserializationContext::read_i32(Self) -> Int32 raise DesertFailure
+pub fn DeserializationContext::read_i64(Self) -> Int64 raise DesertFailure
+pub fn DeserializationContext::read_i8(Self) -> Int32 raise DesertFailure
+pub fn[T : BinaryDeserializer] DeserializationContext::read_optional_value(Self) -> T? raise DesertFailure
+pub fn DeserializationContext::read_string_payload(Self) -> String raise DesertFailure
+pub fn DeserializationContext::read_u16(Self) -> UInt16 raise DesertFailure
+pub fn DeserializationContext::read_u32(Self) -> UInt32 raise DesertFailure
+pub fn DeserializationContext::read_u64(Self) -> UInt64 raise DesertFailure
+pub fn DeserializationContext::read_u8(Self) -> Byte raise DesertFailure
+pub fn DeserializationContext::read_unknown(Self, TypeRegistry) -> RegisteredBox raise DesertFailure
+pub fn DeserializationContext::read_var_i32(Self) -> Int32 raise DesertFailure
+pub fn DeserializationContext::read_var_u32(Self) -> UInt32 raise DesertFailure
+pub fn DeserializationContext::skip(Self, Int32) -> Unit raise DesertFailure
+
+pub(all) enum Evolution {
+  InitialVersion
+  FieldAdded(String)
+  FieldMadeOptional(String)
+  FieldRemoved(String)
+  FieldMadeTransient(String)
+}
+
+#derive(Default, @debug.Debug)
+pub struct Options {
+  chars_as_u16 : Bool
+}
+pub fn Options::default() -> Self
+pub fn Options::scala_compatible() -> Self
+pub fn Options::to_repr(Self) -> @debug.Repr
+
+pub struct RegisteredBox {
+  id : Int32
+  type_name : String
+  value : &RegisteredValue
+}
+
+pub struct RegisteredEntry {
+  id : Int32
+  type_name : String
+  deserialize : (DeserializationContext) -> &RegisteredValue raise DesertFailure
+}
+
+pub struct SerializationContext {
+  state : SerializerState
+  options : Options
+  // private fields
+}
+pub fn SerializationContext::new(&BinaryOutput, SerializerState, Options) -> Self
+pub fn SerializationContext::pop_output(Self) -> &BinaryOutput
+pub fn SerializationContext::push_output(Self, &BinaryOutput) -> Unit
+pub fn[T : BinarySerializer] SerializationContext::write(Self, T) -> Unit raise DesertFailure
+pub fn SerializationContext::write_bytes(Self, BytesView) -> Unit raise DesertFailure
+pub fn SerializationContext::write_compressed(Self, Bytes) -> Unit raise DesertFailure
+pub fn SerializationContext::write_f32(Self, Float) -> Unit raise DesertFailure
+pub fn SerializationContext::write_f64(Self, Double) -> Unit raise DesertFailure
+pub fn SerializationContext::write_i16(Self, Int32) -> Unit raise DesertFailure
+pub fn SerializationContext::write_i32(Self, Int32) -> Unit raise DesertFailure
+pub fn SerializationContext::write_i64(Self, Int64) -> Unit raise DesertFailure
+pub fn SerializationContext::write_i8(Self, Int32) -> Unit raise DesertFailure
+pub fn[T : BinarySerializer] SerializationContext::write_iter_unknown_size(Self, Iter[T]) -> Unit raise DesertFailure
+pub fn SerializationContext::write_string_payload(Self, String) -> Unit raise DesertFailure
+pub fn SerializationContext::write_u16(Self, UInt16) -> Unit raise DesertFailure
+pub fn SerializationContext::write_u32(Self, UInt32) -> Unit raise DesertFailure
+pub fn SerializationContext::write_u64(Self, UInt64) -> Unit raise DesertFailure
+pub fn SerializationContext::write_u8(Self, Byte) -> Unit raise DesertFailure
+pub fn SerializationContext::write_unknown(Self, TypeRegistry, &RegisteredValue) -> Unit raise DesertFailure
+pub fn SerializationContext::write_var_i32(Self, Int32) -> Unit raise DesertFailure
+pub fn SerializationContext::write_var_u32(Self, UInt32) -> Unit raise DesertFailure
+
+pub struct SerializerState {
+  // private fields
+}
+pub fn SerializerState::new() -> Self
+
+pub struct TypeRegistry {
+  // private fields
+}
+pub fn TypeRegistry::empty() -> Self
+pub fn TypeRegistry::entry_of(Self, Int32) -> RegisteredEntry?
+pub fn TypeRegistry::id_of(Self, String) -> Int32?
+
+pub struct TypeRegistryBuilder {
+  // private fields
+}
+pub fn TypeRegistryBuilder::freeze(Self) -> TypeRegistry
+pub fn TypeRegistryBuilder::new() -> Self
+pub fn TypeRegistryBuilder::register(Self, String, (DeserializationContext) -> &RegisteredValue raise DesertFailure) -> Self raise DesertFailure
+pub fn TypeRegistryBuilder::register_placeholder(Self) -> Self
+
+// Type aliases
+
+// Traits
+pub(open) trait BinaryCodec {
+}
+
+pub(open) trait BinaryDeserializer {
+  fn deserialize(DeserializationContext) -> Self raise DesertFailure
+}
+pub impl BinaryDeserializer for Unit
+pub impl BinaryDeserializer for Bool
+pub impl BinaryDeserializer for Byte
+pub impl BinaryDeserializer for Char
+pub impl BinaryDeserializer for Int32
+pub impl BinaryDeserializer for Int64
+pub impl BinaryDeserializer for UInt32
+pub impl BinaryDeserializer for UInt16
+pub impl BinaryDeserializer for UInt64
+pub impl BinaryDeserializer for Float
+pub impl BinaryDeserializer for Double
+pub impl BinaryDeserializer for String
+pub impl[T : BinaryDeserializer] BinaryDeserializer for T?
+pub impl BinaryDeserializer for Bytes
+pub impl[T : BinaryDeserializer] BinaryDeserializer for Array[T]
+pub impl[K : BinaryDeserializer + Hash + Eq, V : BinaryDeserializer] BinaryDeserializer for Map[K, V]
+pub impl[T : BinaryDeserializer, E : BinaryDeserializer] BinaryDeserializer for Result[T, E]
+pub impl[K : BinaryDeserializer + Hash + Eq, V : BinaryDeserializer] BinaryDeserializer for @hashmap.HashMap[K, V]
+pub impl[T : BinaryDeserializer + Hash + Eq] BinaryDeserializer for @hashset.HashSet[T]
+pub impl[A : BinaryDeserializer, B : BinaryDeserializer] BinaryDeserializer for (A, B)
+pub impl[A : BinaryDeserializer, B : BinaryDeserializer, C : BinaryDeserializer] BinaryDeserializer for (A, B, C)
+pub impl[A : BinaryDeserializer, B : BinaryDeserializer, C : BinaryDeserializer, D : BinaryDeserializer] BinaryDeserializer for (A, B, C, D)
+pub impl[A : BinaryDeserializer, B : BinaryDeserializer, C : BinaryDeserializer, D : BinaryDeserializer, E : BinaryDeserializer] BinaryDeserializer for (A, B, C, D, E)
+pub impl[A : BinaryDeserializer, B : BinaryDeserializer, C : BinaryDeserializer, D : BinaryDeserializer, E : BinaryDeserializer, F : BinaryDeserializer] BinaryDeserializer for (A, B, C, D, E, F)
+
+pub(open) trait BinaryOutput {
+  fn write_u8(Self, Byte) -> Unit raise DesertFailure
+  fn write_bytes(Self, BytesView) -> Unit raise DesertFailure
+  fn write_i8(Self, Int32) -> Unit raise DesertFailure = _
+  fn write_u16(Self, UInt16) -> Unit raise DesertFailure = _
+  fn write_i16(Self, Int32) -> Unit raise DesertFailure = _
+  fn write_u32(Self, UInt32) -> Unit raise DesertFailure = _
+  fn write_i32(Self, Int32) -> Unit raise DesertFailure = _
+  fn write_u64(Self, UInt64) -> Unit raise DesertFailure = _
+  fn write_i64(Self, Int64) -> Unit raise DesertFailure = _
+  fn write_f32(Self, Float) -> Unit raise DesertFailure = _
+  fn write_f64(Self, Double) -> Unit raise DesertFailure = _
+  fn write_var_u32(Self, UInt32) -> Unit raise DesertFailure = _
+  fn write_var_i32(Self, Int32) -> Unit raise DesertFailure = _
+}
+
+pub(open) trait BinarySerializer {
+  fn serialize(Self, SerializationContext) -> Unit raise DesertFailure
+}
+pub impl BinarySerializer for Unit
+pub impl BinarySerializer for Bool
+pub impl BinarySerializer for Byte
+pub impl BinarySerializer for Char
+pub impl BinarySerializer for Int32
+pub impl BinarySerializer for Int64
+pub impl BinarySerializer for UInt32
+pub impl BinarySerializer for UInt16
+pub impl BinarySerializer for UInt64
+pub impl BinarySerializer for Float
+pub impl BinarySerializer for Double
+pub impl BinarySerializer for String
+pub impl[T : BinarySerializer] BinarySerializer for T?
+pub impl BinarySerializer for Bytes
+pub impl[T : BinarySerializer] BinarySerializer for Array[T]
+pub impl[K : BinarySerializer, V : BinarySerializer] BinarySerializer for Map[K, V]
+pub impl[T : BinarySerializer, E : BinarySerializer] BinarySerializer for Result[T, E]
+pub impl[K : BinarySerializer, V : BinarySerializer] BinarySerializer for @hashmap.HashMap[K, V]
+pub impl[T : BinarySerializer] BinarySerializer for @hashset.HashSet[T]
+pub impl[A : BinarySerializer, B : BinarySerializer] BinarySerializer for (A, B)
+pub impl[A : BinarySerializer, B : BinarySerializer, C : BinarySerializer] BinarySerializer for (A, B, C)
+pub impl[A : BinarySerializer, B : BinarySerializer, C : BinarySerializer, D : BinarySerializer] BinarySerializer for (A, B, C, D)
+pub impl[A : BinarySerializer, B : BinarySerializer, C : BinarySerializer, D : BinarySerializer, E : BinarySerializer] BinarySerializer for (A, B, C, D, E)
+pub impl[A : BinarySerializer, B : BinarySerializer, C : BinarySerializer, D : BinarySerializer, E : BinarySerializer, F : BinarySerializer] BinarySerializer for (A, B, C, D, E, F)
+
+pub(open) trait RegisteredValue {
+  fn registered_type_name(Self) -> String
+  fn serialize_registered(Self, SerializationContext) -> Unit raise DesertFailure
+}

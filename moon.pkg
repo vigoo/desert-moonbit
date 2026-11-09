@@ -1,0 +1,18 @@
+import {
+  "moonbitlang/core/compress/flate",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/hashmap",
+  "moonbitlang/core/hashset",
+}
+
+import {
+  "moonbitlang/core/bench",
+} for "wbtest"
+
+import {
+  "moonbitlang/core/quickcheck",
+} for "test"
+
+options(
+  "allow-experimental-packages": true,
+)

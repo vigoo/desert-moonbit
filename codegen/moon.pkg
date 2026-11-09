@@ -1,0 +1,15 @@
+import {
+  "moonbitlang/core/env",
+  "moonbitlang/core/list",
+  "moonbitlang/x/fs",
+  "moonbitlang/parser",
+  "moonbitlang/parser/attribute",
+  "moonbitlang/parser/fmt" @formatter,
+  "moonbitlang/parser/syntax",
+}
+
+pkgtype(kind: "executable")
+
+options(
+  "bin-name": "desert-codegen",
+)

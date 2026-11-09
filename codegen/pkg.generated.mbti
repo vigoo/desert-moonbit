@@ -1,0 +1,82 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vigoo/desert/codegen"
+
+import {
+  "moonbitlang/core/list",
+  "moonbitlang/parser/syntax",
+}
+
+// Values
+pub fn emit_enum(EnumIR) -> String
+
+pub fn emit_struct(StructIR) -> String
+
+pub fn is_binary_codec_attr(String) -> Bool
+
+pub fn lowercase_first(String) -> String
+
+pub fn metadata_ref(String) -> String
+
+pub fn parse_between_parens_public(String) -> String raise CodegenError
+
+pub fn parse_derive_args(String) -> DeriveOptions raise CodegenError
+
+pub fn scan_impls(@list.List[@syntax.Impl]) -> (Array[StructIR], Array[EnumIR]) raise CodegenError
+
+pub fn split_top_level(String) -> Array[String]
+
+// Errors
+pub suberror CodegenError {
+  CodegenError(String)
+}
+
+// Types and methods
+pub(all) struct CaseIR {
+  name : String
+  arity : Int32
+  option_flags : Array[Bool]
+  steps : Array[EvolutionIR]
+  transient : Bool
+  transparent : Bool
+}
+
+pub(all) struct DeriveOptions {
+  mut transparent : Bool
+  mut sorted_constructors : Bool
+  mut type_id : String?
+  mut steps : Array[EvolutionIR]
+}
+pub fn DeriveOptions::empty() -> Self
+
+pub(all) struct EnumIR {
+  name : String
+  cases : Array[CaseIR]
+  sorted_constructors : Bool
+  type_id : String?
+}
+
+pub(all) enum EvolutionIR {
+  FieldAddedIR(String, String)
+  FieldMadeOptionalIR(String)
+  FieldRemovedIR(String)
+  FieldMadeTransientIR(String)
+}
+
+pub(all) struct FieldIR {
+  name : String
+  is_option : Bool
+  transient_default : String?
+  added_default : String?
+}
+
+pub(all) struct StructIR {
+  name : String
+  fields : Array[FieldIR]
+  steps : Array[EvolutionIR]
+  transparent : Bool
+  type_id : String?
+}
+
+// Type aliases
+
+// Traits

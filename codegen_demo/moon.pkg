@@ -1,0 +1,5 @@
+warnings = "-4-42-6-7-1"
+
+import {
+  "vigoo/desert",
+}

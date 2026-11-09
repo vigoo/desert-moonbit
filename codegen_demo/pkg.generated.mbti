@@ -1,0 +1,26 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vigoo/desert/codegen_demo"
+
+import {
+  "vigoo/desert",
+}
+
+// Values
+pub fn demo_settings_roundtrip(DemoSettings) -> DemoSettings raise @desert.DesertFailure
+
+pub fn demo_shape_roundtrip(DemoShape) -> DemoShape raise @desert.DesertFailure
+
+pub fn demo_user_roundtrip(DemoUser) -> DemoUser raise @desert.DesertFailure
+
+// Errors
+
+// Types and methods
+type DemoSettings
+
+type DemoShape
+
+type DemoUser
+
+// Type aliases
+
+// Traits
