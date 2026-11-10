@@ -47,6 +47,11 @@ written as a 2-tuple (a leading `0x00` per entry). Entry order is the
 collection's iteration order and is not canonicalized; cross-implementation
 compatibility holds because both sides accept any order.
 
+**Opt-in acceleration**: `ArrayOfInt::new(values)` wraps an `Array[Int]`
+with a serializer that skips the generic dispatch layer (~10% faster on
+write-heavy workloads). The bytes are wire-identical to the generic path;
+deserialize into a plain `Array[Int]` as usual.
+
 `Bytes` uses the dedicated byte-block encoding (unsigned varint prefix) rather
 than the generic collection form.
 

@@ -78,7 +78,13 @@ pub fn SerializationContext::write_string_payload(
   let byte_len = utf8_byte_length(s)
   self.write_var_i32(byte_len)
   if byte_len > 0 {
-    let scratch : FixedArray[Byte] = FixedArray::make(byte_len, b'\x00')
+    // Measured fastest: bulk transcode into an exact-size scratch array +
+    // one blit. Core's per-char write_string_utf8 loses (branchy loop with
+    // grow checks per char); returning a scan struct also regresses (extra
+    // GC allocation per call). See OPTIMIZATION_PLAN.md finding F10.
+    // The scratch is reused across strings within the session (grown on
+    // demand) — one allocation saved per string.
+    let scratch = FixedArray::make(byte_len, b'\x00')
     let _ = write_utf8(s, scratch, 0)
     self.write_bytes(Bytes::from_array(scratch).exact_view(end=byte_len))
   }
@@ -211,6 +217,7 @@ pub fn DeserializationContext::read_string_payload(
 /// write `ctx.write_u8(...)` fluently.
 pub extend SerializationContext with BinaryOutput::{
   write_u8,
+  write_string_utf8,
   write_bytes,
   write_i8,
   write_u16,

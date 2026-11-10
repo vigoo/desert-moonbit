@@ -190,3 +190,40 @@ test "bench serialize size estimation total=20000" (it : @bench.T) {
 
 ///|
 pub extend BenchRecord with Eq::{not_equal, equal}
+
+///|
+test "bench reused buffer serialize int total=100000" (it : @bench.T) {
+  let out = ByteOutput::new(capacity=64)
+  let ctx = SerializationContext::new(
+    out,
+    SerializerState::new(),
+    Options::default(),
+  )
+  it.bench(
+    bench_safe(fn() raise DesertFailure {
+      out.reset()
+      ctx.write_i32(123456789)
+      it.keep(out.length())
+    }),
+  )
+}
+
+///|
+test "bench golden dataset deserialize total=2000" (it : @bench.T) {
+  let dataset = golden_dataset1()
+  it.bench(
+    bench_safe(fn() raise DesertFailure {
+      let back : GoldenModel = deserialize_exhaustive(dataset)
+      it.keep(back.string)
+    }),
+  )
+}
+
+///|
+test "bench golden dataset serialize total=2000" (it : @bench.T) {
+  let dataset = golden_dataset1()
+  let model : GoldenModel = deserialize_exhaustive(dataset)
+  it.bench(
+    bench_safe(fn() raise DesertFailure { it.keep(serialize_to_bytes(model)) }),
+  )
+}

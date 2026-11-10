@@ -95,8 +95,14 @@ pub fn AdtWriter::new_v0(AdtMetadata, SerializationContext) -> Self raise Desert
 pub fn AdtWriter::write_constructor(Self, UInt32, (SerializationContext) -> Unit raise DesertFailure) -> Unit raise DesertFailure
 pub fn[T : BinarySerializer] AdtWriter::write_field(Self, String, T) -> Unit raise DesertFailure
 
+pub struct ArrayOfInt {
+  values : Array[Int32]
+}
+pub fn ArrayOfInt::new(Array[Int32]) -> Self
+pub fn ArrayOfInt::serialize(Self, SerializationContext) -> Unit raise DesertFailure
+pub impl BinarySerializer for ArrayOfInt
+
 pub struct BinaryInput {
-  data : Bytes
   // private fields
 }
 pub fn BinaryInput::is_empty(Self) -> Bool
@@ -119,6 +125,7 @@ pub fn BinaryInput::read_u8(Self) -> Byte raise DesertFailure
 pub fn BinaryInput::read_var_i32(Self) -> Int32 raise DesertFailure
 pub fn BinaryInput::read_var_u32(Self) -> UInt32 raise DesertFailure
 pub fn BinaryInput::remaining(Self) -> Int32
+pub fn BinaryInput::reset_input(Self, Bytes) -> Unit
 pub fn BinaryInput::seek(Self, Int32) -> Unit raise DesertFailure
 pub fn BinaryInput::seek_internal(Self, Int32) -> Unit
 
@@ -127,6 +134,7 @@ pub struct ByteOutput {
 }
 pub fn ByteOutput::length(Self) -> Int32
 pub fn ByteOutput::new(capacity? : Int32) -> Self
+pub fn ByteOutput::reset(Self) -> Unit
 pub fn ByteOutput::to_bytes(Self) -> Bytes
 pub fn ByteOutput::write_bytes(Self, BytesView) -> Unit raise DesertFailure
 pub fn ByteOutput::write_f32(Self, Float) -> Unit raise DesertFailure
@@ -135,6 +143,7 @@ pub fn ByteOutput::write_i16(Self, Int32) -> Unit raise DesertFailure
 pub fn ByteOutput::write_i32(Self, Int32) -> Unit raise DesertFailure
 pub fn ByteOutput::write_i64(Self, Int64) -> Unit raise DesertFailure
 pub fn ByteOutput::write_i8(Self, Int32) -> Unit raise DesertFailure
+pub fn ByteOutput::write_string_utf8(Self, StringView) -> Unit raise DesertFailure
 pub fn ByteOutput::write_u16(Self, UInt16) -> Unit raise DesertFailure
 pub fn ByteOutput::write_u32(Self, UInt32) -> Unit raise DesertFailure
 pub fn ByteOutput::write_u64(Self, UInt64) -> Unit raise DesertFailure
@@ -159,8 +168,8 @@ pub impl BinarySerializer for DeduplicatedString
 
 pub struct DeserializationContext {
   input : BinaryInput
-  state : SerializerState
   options : Options
+  // private fields
 }
 pub fn DeserializationContext::new(BinaryInput, SerializerState, Options) -> Self
 pub fn DeserializationContext::pop_region(Self) -> (Int32, Int32)
@@ -186,6 +195,7 @@ pub fn DeserializationContext::read_u8(Self) -> Byte raise DesertFailure
 pub fn DeserializationContext::read_unknown(Self, TypeRegistry) -> RegisteredBox raise DesertFailure
 pub fn DeserializationContext::read_var_i32(Self) -> Int32 raise DesertFailure
 pub fn DeserializationContext::read_var_u32(Self) -> UInt32 raise DesertFailure
+pub fn DeserializationContext::reset_input(Self, Bytes) -> Unit
 pub fn DeserializationContext::skip(Self, Int32) -> Unit raise DesertFailure
 
 pub(all) enum Evolution {
@@ -235,6 +245,7 @@ pub fn SerializationContext::write_i64(Self, Int64) -> Unit raise DesertFailure
 pub fn SerializationContext::write_i8(Self, Int32) -> Unit raise DesertFailure
 pub fn[T : BinarySerializer] SerializationContext::write_iter_unknown_size(Self, Iter[T]) -> Unit raise DesertFailure
 pub fn SerializationContext::write_string_payload(Self, String) -> Unit raise DesertFailure
+pub fn SerializationContext::write_string_utf8(Self, StringView) -> Unit raise DesertFailure
 pub fn SerializationContext::write_u16(Self, UInt16) -> Unit raise DesertFailure
 pub fn SerializationContext::write_u32(Self, UInt32) -> Unit raise DesertFailure
 pub fn SerializationContext::write_u64(Self, UInt64) -> Unit raise DesertFailure
@@ -311,6 +322,7 @@ pub(open) trait BinaryOutput {
   fn write_f64(Self, Double) -> Unit raise DesertFailure = _
   fn write_var_u32(Self, UInt32) -> Unit raise DesertFailure = _
   fn write_var_i32(Self, Int32) -> Unit raise DesertFailure = _
+  fn write_string_utf8(Self, StringView) -> Unit raise DesertFailure = _
 }
 
 pub(open) trait BinarySerializer {

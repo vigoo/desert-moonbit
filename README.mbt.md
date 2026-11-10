@@ -10,7 +10,10 @@ Documentation: see the [docs/](docs/index.md) chapters —
 [schema evolution](docs/evolution.md),
 [wire format reference](docs/wire_format.md),
 [input/output](docs/input_output.md),
-[type registry](docs/type_registry.md).
+[type registry](docs/type_registry.md),
+[benchmarks](docs/benchmarks.md).
+
+See my a [conference talk from 2022 about the original Scala version](https://blog.vigoo.dev/posts/funscala2022-talk/).
 
 ## Features
 
@@ -29,7 +32,7 @@ Documentation: see the [docs/](docs/index.md) chapters —
 - **Compressed byte blocks** (DEFLATE via `moonbitlang/core/compress`)
 - **Pure MoonBit, no FFI** — runs on wasm, wasm-gc, js, and native
 - Property-based tests (`moonbitlang/quickcheck`) and micro benchmarks
-  (`moon bench`)
+  (`moon bench`) — see the [desert-rust comparison report](docs/benchmarks.md)
 
 ## Usage
 
@@ -57,6 +60,39 @@ struct MyRecord {
 ```sh
 moon run codegen -- <your-package-directory>
 ```
+
+## Project layout
+
+MoonBit organizes code into **packages** — each directory with a `moon.pkg`
+is one package and one namespace, imported as `@desert` (or
+`vigoo/desert/codegen` for subpackages). Files *within* a package are pure
+organization: they do not define namespaces (unlike Java/C#/Rust modules),
+and splitting code across topical files is the standard idiom — see
+`moonbitlang/core/builtin` (241 `.mbt` files) and `moonbitlang/quickcheck`
+in the standard ecosystem. This repository follows that shape:
+
+```
+moon.mod            module metadata (published as vigoo/desert)
+moon.pkg            the root package — the library itself
+error.mbt           DesertFailure taxonomy
+binary_input.mbt    read cursor (BinaryInput)
+binary_output.mbt   write sink (BinaryOutput + ByteOutput)
+codecs_*.mbt        primitive/string/collection/tuple codecs
+evolution.mbt       evolution metadata + wire codes
+adt_writer.mbt      evolved-record writer engine
+adt_reader.mbt      evolved-record reader engine
+state.mbt           per-session dedup state
+registry.mbt        type registry
+compressed.mbt      DEFLATE byte blocks
+facade.mbt          top-level serialize/deserialize
+*_test.mbt / *_wbtest.mbt   blackbox / whitebox tests
+codegen/            desert-codegen generator (executable package)
+codegen_demo/       generated-code golden test package
+docs/               documentation chapters
+```
+
+The generated `pkg.generated.mbti` file is the package's public API surface
+(the equivalent of Rust's `lib.rs` exports — run `moon info` to refresh it).
 
 ## Development
 

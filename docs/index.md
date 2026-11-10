@@ -12,3 +12,4 @@ Chapters:
 - [Wire format reference](wire_format.md)
 - [Input and output](input_output.md)
 - [Type registry](type_registry.md)
+- [Benchmarks and desert-rust comparison](benchmarks.md)

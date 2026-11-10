@@ -38,6 +38,11 @@ pub(open) trait BinaryOutput {
   /// Write a base-128 varint of a signed 32-bit value, zigzag-mapped
   /// (1-5 bytes, symmetric with `write_var_u32`).
   fn write_var_i32(Self, Int32) -> Unit raise DesertFailure = _
+  /// Write a string as UTF-8. The default implementation transcodes into a
+  /// scratch buffer and forwards to `write_bytes`; buffer-backed sinks
+  /// override it with a zero-allocation pass (lone surrogates are the
+  /// caller's responsibility — this operation writes the view as-is).
+  fn write_string_utf8(Self, StringView) -> Unit raise DesertFailure = _
 }
 
 ///|
@@ -184,6 +189,12 @@ pub impl BinaryOutput for ByteOutput with fn write_f64(self, value) {
 }
 
 ///|
+/// Zero-allocation pass-through to the core Buffer's UTF-8 writer.
+pub impl BinaryOutput for ByteOutput with fn write_string_utf8(self, s) {
+  self.buffer.write_string_utf8(s)
+}
+
+///|
 /// The bytes written so far, as an immutable snapshot.
 pub fn ByteOutput::to_bytes(self : ByteOutput) -> Bytes {
   self.buffer.to_bytes()
@@ -211,4 +222,25 @@ pub extend ByteOutput with BinaryOutput::{
   write_f64,
   write_var_u32,
   write_var_i32,
+  write_string_utf8,
+}
+
+///|
+/// Discard the bytes written so far, reusing the allocated capacity.
+pub fn ByteOutput::reset(self : ByteOutput) -> Unit {
+  self.buffer.reset()
+}
+
+///|
+/// Default `write_string_utf8`: transcode into a scratch array (exact-size
+/// allocation), then bulk-write. Lone surrogates are substituted with `?`.
+impl BinaryOutput with fn write_string_utf8(self, s : StringView) {
+  let owned = s.to_owned()
+  let byte_len = utf8_byte_length(owned)
+  if byte_len == 0 {
+    return
+  }
+  let scratch : FixedArray[Byte] = FixedArray::make(byte_len, b'\x00')
+  let _ = write_utf8(owned, scratch, 0)
+  self.write_bytes(Bytes::from_array(scratch).exact_view(end=byte_len))
 }

@@ -100,6 +100,33 @@ pub impl[T : BinarySerializer] BinarySerializer for Array[T] with fn serialize(
 }
 
 ///|
+/// Specialized counted-form serializer for `Array[Int]`: plain loop over
+/// `ctx.write_i32` — wire-identical to the generic path (count prefix +
+/// 4-byte BE payloads), minus iterator/generic dispatch overhead.
+pub impl BinarySerializer for ArrayOfInt with fn serialize(self, ctx) {
+  ctx.write_var_i32(self.values.length())
+  for v in self.values {
+    ctx.write_i32(v)
+  }
+}
+
+///|
+/// Newtype marking an `Array[Int]` with the specialized codec (MoonBit
+/// coherence: a second `BinarySerializer` impl cannot be attached to
+/// `Array[Int]` itself).
+pub struct ArrayOfInt {
+  values : Array[Int32]
+}
+
+///|
+/// Wrap an `Array[Int]` to use the specialized serializer. Deserialization
+/// via the plain `Array[Int]` codec accepts the identical bytes, so callers
+/// can keep decoding into a plain array.
+pub fn ArrayOfInt::new(values : Array[Int32]) -> ArrayOfInt {
+  { values, }
+}
+
+///|
 pub impl[T : BinaryDeserializer] BinaryDeserializer for Array[T] with fn deserialize(
   ctx,
 ) {
@@ -279,3 +306,6 @@ pub impl[T : BinaryDeserializer + Hash + Eq] BinaryDeserializer for @hashset.Has
   }
   set
 }
+
+///|
+pub extend ArrayOfInt with BinarySerializer::{serialize}

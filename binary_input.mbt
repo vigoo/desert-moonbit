@@ -7,17 +7,19 @@
 /// a byte range (an evolved record's generation chunk) and `seek` to jump
 /// between chunk start positions.
 pub struct BinaryInput {
-  data : Bytes
+  priv mut data : Bytes
   priv mut pos : Int32
   priv mut limit : Int32
-  priv region_stack : Array[(Int32, Int32)]
+  /// Allocated lazily on first `push_region` — plain version-0
+  /// deserialization (the common case) never touches it.
+  priv mut region_stack : Array[(Int32, Int32)]?
 }
 
 ///|
 /// Create an input reading from `data`, starting at position 0.
 pub fn BinaryInput::new(data : Bytes) -> BinaryInput {
   let len = data.length()
-  { data, pos: 0, limit: len, region_stack: [], }
+  { data, pos: 0, limit: len, region_stack: None, }
 }
 
 ///|
@@ -77,7 +79,13 @@ pub fn BinaryInput::push_region(
   start : Int32,
   size : Int32,
 ) -> Unit {
-  self.region_stack.push((self.pos, self.limit))
+  match self.region_stack {
+    Some(stack) => stack.push((self.pos, self.limit))
+    None => {
+      let stack : Array[(Int32, Int32)] = [(self.pos, self.limit)]
+      self.region_stack = Some(stack)
+    }
+  }
   self.pos = start
   self.limit = start + size
 }
@@ -89,11 +97,15 @@ pub fn BinaryInput::push_region(
 pub fn BinaryInput::pop_region(self : BinaryInput) -> (Int32, Int32) {
   let remaining_start = self.pos
   let remaining_size = self.limit - self.pos
-  match self.region_stack.pop() {
-    Some((pos, limit)) => {
-      self.pos = pos
-      self.limit = limit
-    }
+  match self.region_stack {
+    Some(stack) =>
+      match stack.pop() {
+        Some((pos, limit)) => {
+          self.pos = pos
+          self.limit = limit
+        }
+        None => ()
+      }
     None => ()
   }
   (remaining_start, remaining_size)
@@ -229,4 +241,15 @@ pub fn BinaryInput::read_var_i32(
   let raw = self.read_var_u32()
   let inv = if (raw & 1U) == 1U { 0xFFFFFFFFU } else { 0U }
   ((raw >> 1) ^ inv).reinterpret_as_int()
+}
+
+///|
+/// Point the input at new data and clear any region state, reusing the
+/// allocated object. Session state lives in the `DeserializationContext`
+/// and is reset separately.
+pub fn BinaryInput::reset_input(self : BinaryInput, data : Bytes) -> Unit {
+  self.data = data
+  self.pos = 0
+  self.limit = data.length()
+  self.region_stack = None
 }

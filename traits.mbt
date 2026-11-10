@@ -17,7 +17,7 @@ pub struct SerializationContext {
 /// and the format options. The state table is filled as strings are read.
 pub struct DeserializationContext {
   input : BinaryInput
-  state : SerializerState
+  priv mut state : SerializerState
   options : Options
 }
 
@@ -76,4 +76,16 @@ pub fn DeserializationContext::new(
   options : Options,
 ) -> DeserializationContext {
   { input, state, options, }
+}
+
+///|
+/// Point a deserialization context at new data: resets the input cursor and
+/// installs a fresh session state (dedup ids never leak across calls).
+/// Lets hot loops reuse the context instead of paying per-call allocation.
+pub fn DeserializationContext::reset_input(
+  self : DeserializationContext,
+  data : Bytes,
+) -> Unit {
+  self.input.reset_input(data)
+  self.state = SerializerState::new()
 }
