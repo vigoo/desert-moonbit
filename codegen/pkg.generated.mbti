@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "vigoo/desert/codegen"
+package "vigoo/desert-codegen"
 
 import {
   "moonbitlang/core/list",

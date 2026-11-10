@@ -266,8 +266,8 @@ test "emit enum with transient case consumes no id" {
   assert_eq(reports.length(), 0)
   let formatted = @formatter.impls_to_string(parsed)
   // Alpha = 0, Gamma = 1 (Beta skipped).
-  assert_eq(formatted.contains("Alpha(_) => 0U"), true)
-  assert_eq(formatted.contains("Gamma => 1U"), true)
+  assert_eq(formatted.contains("Alpha(_) => 0"), true)
+  assert_eq(formatted.contains("Gamma => 1"), true)
   assert_eq(
     formatted.contains("SerializingTransientConstructor(\"E.Beta\")"),
     true,

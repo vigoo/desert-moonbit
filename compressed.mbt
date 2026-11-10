@@ -42,12 +42,19 @@ pub fn DeserializationContext::read_compressed(
   }
   let compressed = self.input.read_bytes(compressed_len)
   let res : Result[Bytes, @flate.InflateError] = Ok(
-    @flate.inflate_exact(compressed.exact_view()),
+    @flate.inflate_exact(compressed.exact_view(), max_output=uncompressed_len),
   ) catch {
     e => Err(e)
   }
   match res {
-    Ok(data) => data
+    Ok(data) =>
+      if data.length() != uncompressed_len {
+        raise DeserializationFailure(
+          "Compressed block length mismatch: expected \{uncompressed_len}, got \{data.length()}",
+        )
+      } else {
+        data
+      }
     Err(_) => raise DeserializationFailure("Failed to decompress data block")
   }
 }

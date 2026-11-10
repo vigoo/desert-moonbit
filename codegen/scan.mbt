@@ -2,6 +2,14 @@
 /// Scan parsed sources for `#derive.binary_codec` targets and build the IR.
 
 ///|
+fn is_enum(desc : @syntax.TypeDesc) -> Bool {
+  match desc {
+    @syntax.Variant(_) | @syntax.ExtensibleEnum(_) => true
+    _ => false
+  }
+}
+
+///|
 fn is_option_type(ty : @syntax.Type) -> Bool {
   match ty {
     @syntax.Option(..) => true
@@ -220,6 +228,11 @@ pub fn scan_impls(
         match found {
           Some(options) => {
             let name = type_decl.tycon
+            if is_enum(type_decl.components) && options.steps.length() > 0 {
+              raise CodegenError(
+                "container-level evolution on enums is not supported (put evolution steps on individual cases instead): \{name}",
+              )
+            }
             match type_decl.components {
               @syntax.Record(..) =>
                 structs.push(parse_struct(name, type_decl.components, options))

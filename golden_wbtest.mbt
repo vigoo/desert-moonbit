@@ -195,8 +195,8 @@ let second_case_metadata : AdtMetadata = AdtMetadata::new([
 impl BinarySerializer for ListElement2 with fn serialize(self, ctx) {
   let writer = AdtWriter::new_v0(list_element2_metadata, ctx)
   let constructor_idx : UInt32 = match self {
-    First(_) => 0U
-    Second(_, _, _) => 1U
+    First(_) => 0
+    Second(_, _, _) => 1
     Third(_) => raise SerializingTransientConstructor("ListElement2.Third")
   }
   writer.write_constructor(constructor_idx, inner => {

@@ -89,3 +89,17 @@ pub fn DeserializationContext::reset_input(
   self.input.reset_input(data)
   self.state = SerializerState::new()
 }
+
+///|
+/// The per-call format options.
+pub fn SerializationContext::options(self : SerializationContext) -> Options {
+  self.options
+}
+
+///|
+/// The per-call format options.
+pub fn DeserializationContext::options(
+  self : DeserializationContext,
+) -> Options {
+  self.options
+}

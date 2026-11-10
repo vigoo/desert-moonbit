@@ -78,6 +78,11 @@ pub impl BinarySerializer for Bytes with fn serialize(self, ctx) {
 ///|
 pub impl BinaryDeserializer for Bytes with fn deserialize(ctx) {
   let len = ctx.read_var_u32().reinterpret_as_int()
+  if len < 0 {
+    // reinterpret_as_int folded a >= 2^31 varint negative; the region
+    // fence would otherwise trap instead of failing cleanly.
+    raise DeserializationFailure("Byte block length out of range: \{len}")
+  }
   ctx.input.read_bytes(len)
 }
 

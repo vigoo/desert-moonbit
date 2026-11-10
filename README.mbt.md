@@ -29,6 +29,8 @@ See my a [conference talk from 2022 about the original Scala version](https://bl
 - **Opt-in string deduplication** (`DeduplicatedString`) with session-scoped
   ids, shared with the evolution headers
 - **Type registry** for runtime-dispatched ("unknown") serialization
+- Known limitation: object back-reference tracking (Scala
+  `storeRefOrObject`) is not implemented yet; see docs/codecs.md
 - **Compressed byte blocks** (DEFLATE via `moonbitlang/core/compress`)
 - **Pure MoonBit, no FFI** — runs on wasm, wasm-gc, js, and native
 - Property-based tests (`moonbitlang/quickcheck`) and micro benchmarks
@@ -58,6 +60,7 @@ struct MyRecord {
 ```
 
 ```sh
+# from a clone of this repository (a MoonBit workspace):
 moon run codegen -- <your-package-directory>
 ```
 

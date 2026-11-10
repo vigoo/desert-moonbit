@@ -36,8 +36,9 @@ pub fn[T : BinarySerializer] serialize_to_output(
 }
 
 ///|
-/// Compute the serialized size of `value` in bytes, by writing into a
-/// discard sink. Two-pass exact-size serialization can be built on this.
+/// Compute the serialized size of `value` in bytes (the bytes are written
+/// to a scratch output and discarded). Two-pass exact-size serialization
+/// can be built on this.
 pub fn[T : BinarySerializer] serialized_size(
   value : T,
   options~ : Options = Options::default(),

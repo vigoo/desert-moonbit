@@ -24,8 +24,3 @@ keywords = [ "serialization", "binary", "codec", "evolution" ]
 preferred_target = "wasm-gc"
 
 description = "Binary serialization with schema evolution, wire-compatible with desert (Scala) and desert-rust"
-
-import {
-  "moonbitlang/parser@0.4.7",
-  "moonbitlang/x@0.5.7",
-}

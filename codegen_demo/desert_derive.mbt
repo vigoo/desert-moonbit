@@ -92,13 +92,13 @@ impl @desert.BinaryDeserializer for DemoSettings with fn deserialize(ctx) {
 ///
 impl @desert.BinarySerializer for DemoShape with fn serialize(self, ctx) {
   ctx.write_u8(b'\x00')
-  let idx : UInt32 = match self {
-    Circle(_) => 0U
-    Point => 1U
+  let idx : Int32 = match self {
+    Circle(_) => 0
+    Point => 1
     Hidden(_) =>
       raise @desert.SerializingTransientConstructor("DemoShape.Hidden")
   }
-  ctx.write_var_u32(idx)
+  ctx.write_var_u32(idx.reinterpret_as_uint())
   match self {
     Circle(f0) => {
       ctx.write_u8(b'\x00')

@@ -315,7 +315,7 @@ fn emit_enum_serializer(en : EnumIR, sb : StringBuilder) -> Unit {
   sb.write_string("///|\nimpl @desert.BinarySerializer for ")
   sb.write_string(en.name)
   sb.write_string(
-    " with serialize(self, ctx) {\n  ctx.write_u8(b'\\x00')\n  let idx : UInt = match self {\n",
+    " with serialize(self, ctx) {\n  ctx.write_u8(b'\\x00')\n  let idx : Int32 = match self {\n",
   )
   let mut idx = 0
   for case in en.cases {
@@ -326,7 +326,7 @@ fn emit_enum_serializer(en : EnumIR, sb : StringBuilder) -> Unit {
     case_ctor_pattern_wildcard(case, sb)
     sb.write_string(" => ")
     sb.write_string(idx.to_string())
-    sb.write_string("U\n")
+    sb.write_string("\n")
     idx = idx + 1
   }
   for case in en.cases {
@@ -340,7 +340,9 @@ fn emit_enum_serializer(en : EnumIR, sb : StringBuilder) -> Unit {
       sb.write_string("\")\n")
     }
   }
-  sb.write_string("  }\n  ctx.write_var_u32(idx)\n  match self {\n")
+  sb.write_string(
+    "  }\n  ctx.write_var_u32(idx.reinterpret_as_uint())\n  match self {\n",
+  )
   for case in en.cases {
     if case.transient {
       sb.write_string("    ")
@@ -356,8 +358,12 @@ fn emit_enum_serializer(en : EnumIR, sb : StringBuilder) -> Unit {
     case_ctor_pattern(case, sb)
     sb.write_string(" => {\n")
     if case.transparent {
-      // Payload is the single inner value, no case version byte.
-      sb.write_string("      @desert.BinarySerializer::serialize(f0, ctx)\n")
+      if case.arity == 0 {
+        // Transparent unit case: the constructor index is the entire payload.
+      } else {
+        // Payload is the single inner value, no case version byte.
+        sb.write_string("      @desert.BinarySerializer::serialize(f0, ctx)\n")
+      }
     } else if case.steps.length() == 0 {
       sb.write_string("      ctx.write_u8(b'\\x00')\n")
       for i in 0..<case.arity {
@@ -410,7 +416,10 @@ fn emit_enum_deserializer(en : EnumIR, sb : StringBuilder) -> Unit {
     if case.transparent {
       sb.write_string("      ")
       sb.write_string(case.name)
-      sb.write_string("(@desert.BinaryDeserializer::deserialize(ctx))\n")
+      if case.arity > 0 {
+        sb.write_string("(@desert.BinaryDeserializer::deserialize(ctx))")
+      }
+      sb.write_string("\n")
     } else if case.steps.length() == 0 {
       sb.write_string(
         "      let case_stored = ctx.read_u8().to_int()\n      if case_stored != 0 {\n        raise @desert.DeserializationFailure(\"Case \\\"",

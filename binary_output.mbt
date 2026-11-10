@@ -129,7 +129,7 @@ impl BinaryOutput with fn write_var_i32(self, value : Int32) {
 /// Overrides the fixed-width operations with the bulk fast paths of the core
 /// `Buffer`.
 pub struct ByteOutput {
-  buffer : Buffer
+  priv buffer : Buffer
 }
 
 ///|

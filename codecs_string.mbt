@@ -39,6 +39,13 @@ pub impl BinaryDeserializer for Char with fn deserialize(ctx) {
     }
   } else {
     let cp = ctx.input.read_var_u32().reinterpret_as_int()
+    // Validate like desert-rust: reject out-of-range and surrogate values
+    // instead of materializing an invalid Char.
+    if cp < 0 || cp > 0x10FFFF || (cp >= 0xD800 && cp <= 0xDFFF) {
+      raise DeserializationFailure(
+        "Failed to decode character: invalid code point \{cp}",
+      )
+    }
     cp.unsafe_to_char()
   }
 }
@@ -59,7 +66,7 @@ pub impl BinaryDeserializer for Char with fn deserialize(ctx) {
 /// `String` fields are always evolution-safe.
 #derive(Debug, Eq)
 pub struct DeduplicatedString {
-  string : String
+  priv string : String
 }
 
 ///|

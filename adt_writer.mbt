@@ -28,6 +28,11 @@ pub fn AdtWriter::new_v0(
   metadata : AdtMetadata,
   ctx : SerializationContext,
 ) -> AdtWriter raise DesertFailure {
+  if metadata.version != 0 {
+    abort(
+      "desert: AdtWriter::new_v0 requires version-0 metadata (got version \{metadata.version})",
+    )
+  }
   ctx.write_u8(b'\x00')
   {
     metadata,

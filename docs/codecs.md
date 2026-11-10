@@ -52,6 +52,17 @@ with a serializer that skips the generic dispatch layer (~10% faster on
 write-heavy workloads). The bytes are wire-identical to the generic path;
 deserialize into a plain `Array[Int]` as usual.
 
+## Reference tracking (not yet implemented)
+
+The original libraries support object back-references for cyclic graphs
+(Scala `storeRefOrObject`, desert-rust `store_ref_or_object`): the first
+occurrence of an object is written inline (`var_u32(0)` prefix) and later
+occurrences as `var_u32(id)` back-references. This port does not implement
+it yet — MoonBit has no object identity primitive to key the table on.
+The wire-level vocabulary is reserved (`InvalidRefId` exists in the error
+taxonomy), so a future implementation is additive. Streams written by
+Scala/Rust that contain back-references cannot be read yet.
+
 `Bytes` uses the dedicated byte-block encoding (unsigned varint prefix) rather
 than the generic collection form.
 

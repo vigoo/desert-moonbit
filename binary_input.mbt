@@ -64,10 +64,17 @@ pub fn BinaryInput::seek(
 }
 
 ///|
-/// Unchecked absolute seek used by `DeserializationContext::skip`, which
-/// has already validated the target against the region limit.
-pub fn BinaryInput::seek_internal(self : BinaryInput, target : Int32) -> Unit {
-  self.pos = target
+/// Advance the cursor by `count` bytes; negative counts fail cleanly
+/// instead of wrapping into a trap on a later view construction.
+pub fn BinaryInput::skip_bytes(
+  self : BinaryInput,
+  count : Int32,
+) -> Unit raise DesertFailure {
+  if count < 0 {
+    raise DeserializationFailure("Negative skip count: \{count}")
+  }
+  self.ensure(count)
+  self.pos = self.pos + count
 }
 
 ///|
@@ -126,6 +133,9 @@ pub fn BinaryInput::read_bytes_view(
   self : BinaryInput,
   count : Int32,
 ) -> BytesView raise DesertFailure {
+  if count < 0 {
+    raise DeserializationFailure("Negative byte count: \{count}")
+  }
   self.ensure(count)
   let view = self.data.exact_view(start=self.pos, end=self.pos + count)
   self.pos = self.pos + count

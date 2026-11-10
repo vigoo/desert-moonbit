@@ -2,7 +2,6 @@
 package "vigoo/desert"
 
 import {
-  "moonbitlang/core/buffer",
   "moonbitlang/core/debug",
   "moonbitlang/core/hashmap",
   "moonbitlang/core/hashset",
@@ -18,8 +17,6 @@ pub fn[T : BinaryDeserializer] deserialize(Bytes, options? : Options) -> T raise
 pub fn[T : BinaryDeserializer] deserialize_exhaustive(Bytes, options? : Options) -> T raise DesertFailure
 
 pub fn deserialize_unknown_from_bytes(Bytes, TypeRegistry, options? : Options) -> RegisteredBox raise DesertFailure
-
-pub fn golden_dataset1() -> Bytes
 
 pub fn read_utf8(BytesView) -> String raise DesertFailure
 
@@ -68,12 +65,7 @@ pub impl Show for DesertFailure
 
 // Types and methods
 pub struct AdtMetadata {
-  version : Int32
-  field_generations : @hashmap.HashMap[String, Int32]
-  made_optional_at : @hashmap.HashMap[String, Int32]
-  removed_fields : @hashmap.HashMap[String, Bool]
-  evolution_steps : Array[Evolution]
-  contains_field_made_optional : Bool
+  // private fields
 }
 pub fn AdtMetadata::new(Array[Evolution]) -> Self
 
@@ -127,10 +119,10 @@ pub fn BinaryInput::read_var_u32(Self) -> UInt32 raise DesertFailure
 pub fn BinaryInput::remaining(Self) -> Int32
 pub fn BinaryInput::reset_input(Self, Bytes) -> Unit
 pub fn BinaryInput::seek(Self, Int32) -> Unit raise DesertFailure
-pub fn BinaryInput::seek_internal(Self, Int32) -> Unit
+pub fn BinaryInput::skip_bytes(Self, Int32) -> Unit raise DesertFailure
 
 pub struct ByteOutput {
-  buffer : @buffer.Buffer
+  // private fields
 }
 pub fn ByteOutput::length(Self) -> Int32
 pub fn ByteOutput::new(capacity? : Int32) -> Self
@@ -154,7 +146,7 @@ pub impl BinaryOutput for ByteOutput
 
 #derive(Eq, @debug.Debug)
 pub struct DeduplicatedString {
-  string : String
+  // private fields
 }
 pub fn DeduplicatedString::deserialize(DeserializationContext) -> Self raise DesertFailure
 pub fn DeduplicatedString::equal(Self, Self) -> Bool
@@ -172,6 +164,7 @@ pub struct DeserializationContext {
   // private fields
 }
 pub fn DeserializationContext::new(BinaryInput, SerializerState, Options) -> Self
+pub fn DeserializationContext::options(Self) -> Options
 pub fn DeserializationContext::pop_region(Self) -> (Int32, Int32)
 pub fn DeserializationContext::pos(Self) -> Int32
 pub fn DeserializationContext::push_region(Self, Int32, Int32) -> Unit
@@ -232,6 +225,7 @@ pub struct SerializationContext {
   // private fields
 }
 pub fn SerializationContext::new(&BinaryOutput, SerializerState, Options) -> Self
+pub fn SerializationContext::options(Self) -> Options
 pub fn SerializationContext::pop_output(Self) -> &BinaryOutput
 pub fn SerializationContext::push_output(Self, &BinaryOutput) -> Unit
 pub fn[T : BinarySerializer] SerializationContext::write(Self, T) -> Unit raise DesertFailure
@@ -288,6 +282,7 @@ pub impl BinaryDeserializer for Bool
 pub impl BinaryDeserializer for Byte
 pub impl BinaryDeserializer for Char
 pub impl BinaryDeserializer for Int32
+pub impl BinaryDeserializer for Int16
 pub impl BinaryDeserializer for Int64
 pub impl BinaryDeserializer for UInt32
 pub impl BinaryDeserializer for UInt16
@@ -333,6 +328,7 @@ pub impl BinarySerializer for Bool
 pub impl BinarySerializer for Byte
 pub impl BinarySerializer for Char
 pub impl BinarySerializer for Int32
+pub impl BinarySerializer for Int16
 pub impl BinarySerializer for Int64
 pub impl BinarySerializer for UInt32
 pub impl BinarySerializer for UInt16

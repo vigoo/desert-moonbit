@@ -44,12 +44,16 @@ fn InputRegion::empty() -> InputRegion {
 }
 
 ///|
-/// Create a reader for a version-0 record whose data was also written by a
-/// version-0 codec: fields follow the version byte directly.
+/// Create a reader for data whose *stored* version is 0: fields follow the
+/// version byte directly (the metadata may still describe a newer schema —
+/// new readers reading old data).
 pub fn AdtReader::new_v0(
   metadata : AdtMetadata,
   ctx : DeserializationContext,
 ) -> AdtReader {
+  // Note: metadata may have any version — this constructor is used whenever
+  // the *stored* version is 0 (a new reader reading old data), where chunk
+  // machinery is not needed.
   {
     metadata,
     ctx,

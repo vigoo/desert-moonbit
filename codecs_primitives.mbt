@@ -4,6 +4,7 @@
 /// Wire encodings (byte-compatible with desert / desert-rust):
 /// - `Byte`   : 1 raw byte
 /// - `Bool`   : 1 byte, `1` = true, `0` = false
+/// - `Int16`  : 2 bytes, big-endian (two's complement)
 /// - `UInt16` : 2 bytes, big-endian
 /// - `Int`    : 4 bytes, big-endian, two's complement
 /// - `UInt`   : 4 bytes, big-endian
@@ -31,6 +32,16 @@ pub impl BinarySerializer for Bool with fn serialize(self, ctx) {
 ///|
 pub impl BinaryDeserializer for Bool with fn deserialize(ctx) {
   ctx.input.read_u8() != b'\x00'
+}
+
+///|
+pub impl BinarySerializer for Int16 with fn serialize(self, ctx) {
+  ctx.write_u16(self.reinterpret_as_uint16())
+}
+
+///|
+pub impl BinaryDeserializer for Int16 with fn deserialize(ctx) {
+  Int16::reinterpret_from_uint16(ctx.input.read_u16())
 }
 
 ///|

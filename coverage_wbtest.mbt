@@ -364,3 +364,84 @@ test "input seek and remaining" {
     _ => abort("expected InputEndedUnexpectedly")
   }
 }
+
+///|
+test "Int16 codec: wire format, sign handling, roundtrip" {
+  // Wire: 2-byte BE two's complement (matches Scala Short / Rust i16).
+  let v = Int16::reinterpret_from_uint16((0x10000 - 1234).to_uint16())
+  assert_eq(cser(v), b"\xfb\x2e")
+  let back : Int16 = cdeser(b"\xfb\x2e")
+  assert_eq(back.to_int(), -1234)
+  // Roundtrip extremes via the public codec.
+  let lo : Int16 = Int16::reinterpret_from_uint16((0x8000).to_uint16())
+  let lo_back : Int16 = cdeser(cser(lo))
+  assert_eq(lo_back.to_int(), -32768)
+  let hi : Int16 = Int16::reinterpret_from_uint16((0x7FFF).to_uint16())
+  let hi_back : Int16 = cdeser(cser(hi))
+  assert_eq(hi_back.to_int(), 32767)
+}
+
+///|
+test "Bytes codec rejects negative (2^31) length cleanly" {
+  // var_u32(2147483648) — reinterprets as negative Int32; must fail with
+  // DesertFailure instead of trapping in view construction.
+  let hostile : Bytes = b"\x80\x80\x80\x80\x08\x01\x02\x03\x04"
+  let res : Result[Bytes, DesertFailure] = Ok(deserialize_exhaustive(hostile)) catch {
+    e => Err(e)
+  }
+  match res {
+    Err(DeserializationFailure(_)) => ()
+    _ => abort("expected a clean DeserializationFailure")
+  }
+}
+
+///|
+test "Char decode rejects invalid code points" {
+  // Raw-varint Char inputs (default encoding = raw varint code point).
+  fn char_bytes(cp : UInt32) -> Bytes raise DesertFailure {
+    let out = ByteOutput::new()
+    let ctx = SerializationContext::new(
+      out,
+      SerializerState::new(),
+      Options::default(),
+    )
+    ctx.write_var_u32(cp)
+    out.to_bytes()
+  }
+
+  fn decode_char(bytes : Bytes) -> Result[Char, DesertFailure] {
+    let res : Result[Char, DesertFailure] = Ok(deserialize_exhaustive(bytes)) catch {
+      e => Err(e)
+    }
+    res
+  }
+
+  fn expect_fail(bytes : Bytes) -> Unit {
+    match decode_char(bytes) {
+      Err(DeserializationFailure(_)) => ()
+      _ => abort("expected a clean DeserializationFailure")
+    }
+  }
+
+  // Code point 0x110000 (beyond Unicode max).
+  expect_fail(char_bytes(0x110000))
+  // Surrogate code point 0xD800.
+  expect_fail(char_bytes(0xD800))
+  // A value whose reinterpret_as_int is negative.
+  expect_fail(char_bytes(0xFFFFFFFF))
+  // Valid boundary values still decode (raw varints).
+  assert_eq(
+    match decode_char(char_bytes(0)) {
+      Ok(c) => c.to_int()
+      Err(_) => -1
+    },
+    0,
+  )
+  assert_eq(
+    match decode_char(char_bytes(0x10FFFF)) {
+      Ok(c) => c.to_int()
+      Err(_) => -1
+    },
+    0x10FFFF,
+  )
+}

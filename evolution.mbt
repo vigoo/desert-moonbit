@@ -69,19 +69,19 @@ fn FieldPosition::from_byte(byte : Int32) -> FieldPosition {
 /// `AdtMetadata::new`.
 pub struct AdtMetadata {
   /// Wire version: `evolution_steps.length() - 1`.
-  version : Int32
+  priv version : Int32
   /// Field name -> index of the `FieldAdded` step that introduced it
   /// (0 if present from the start).
-  field_generations : @hashmap.HashMap[String, Int32]
+  priv field_generations : @hashmap.HashMap[String, Int32]
   /// Field name -> index of its `FieldMadeOptional` step.
-  made_optional_at : @hashmap.HashMap[String, Int32]
+  priv made_optional_at : @hashmap.HashMap[String, Int32]
   /// Names removed by `FieldRemoved`/`FieldMadeTransient` steps.
-  removed_fields : @hashmap.HashMap[String, Bool]
+  priv removed_fields : @hashmap.HashMap[String, Bool]
   /// The declared steps, including the leading `InitialVersion`.
-  evolution_steps : Array[Evolution]
+  priv evolution_steps : Array[Evolution]
   /// True when any step is `FieldMadeOptional` (enables field-position
   /// tracking, which is only needed to disambiguate those entries).
-  contains_field_made_optional : Bool
+  priv contains_field_made_optional : Bool
 }
 
 ///|
@@ -90,6 +90,9 @@ pub struct AdtMetadata {
 ///
 /// Panics with more than 255 steps (the version byte is a single `u8`).
 pub fn AdtMetadata::new(steps : Array[Evolution]) -> AdtMetadata {
+  if steps.length() == 0 {
+    abort("desert: evolution steps must start with InitialVersion")
+  }
   if steps.length() > 255 {
     abort("desert: too many evolution steps (max 255)")
   }

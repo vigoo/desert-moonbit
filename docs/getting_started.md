@@ -56,9 +56,22 @@ struct Point {
 }
 ```
 
-```sh
-moon run desert/codegen -- <your-package-directory>
-```
+The generator, `desert-codegen`, is published as its own MoonBit module
+(`vigoo/desert-codegen`) with an executable package. There are two ways to
+run it:
+
+1. **From a clone of the repository** (recommended; the repo is a MoonBit
+   workspace):
+
+   ```sh
+   git clone https://github.com/vigoo/desert-moonbit
+   cd desert-moonbit
+   moon run codegen -- <absolute path to your package directory>
+   ```
+
+2. **From the mooncakes dependency**: add `vigoo/desert-codegen` to a
+   scratch module's dependencies (`moon add vigoo/desert-codegen`) and run
+   its executable against your package directory.
 
 The generator writes a `desert_derive.mbt` file next to your sources with the
 `BinarySerializer`/`BinaryDeserializer` implementations, and adds the
