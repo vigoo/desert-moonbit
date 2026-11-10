@@ -83,7 +83,7 @@ respective test/bench files; the Rust harness embeds the same
 |---|---:|---:|---:|---:|
 | baseline (empty op) | ~0.3 ns | 1.5 ns | 9.8 ns | — |
 | serialize i32 | 17.5 ns | 121 ns | 46 ns | ~7x |
-| deserialize i32 | 2.1 ns | 56 ns | 27 ns | ~27x |
+| deserialize i32 | 2.1 ns | 49–53 ns | 27 ns | ~24x |
 | serialize string (43 B) | 22.9 ns | 201 ns | 334 ns | ~9x |
 | deserialize string (43 B) | 21.8 ns | 315 ns | 280 ns | ~14x |
 | write var_i32(-123456789) | 19.1 ns | 87 ns | 46 ns | ~4.6x |
