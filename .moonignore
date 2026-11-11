@@ -1,5 +1,8 @@
-_build/
-.mooncakes/
-.DS_Store
-*.lk
+# Excluded from `moon package` / `moon publish` archives.
+# Test/bench sources are kept: they are needed to run the test suite
+# from a checkout of the published source.
+skills-lock.json
+scripts/
 testdata/
+REVIEW.md
+OPTIMIZATION_PLAN.md

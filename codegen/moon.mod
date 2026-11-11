@@ -2,13 +2,17 @@ name = "vigoo/desert-codegen"
 
 version = "0.1.0"
 
-readme = "codegen/README.md"
+readme = "README.md"
 
 repository = "https://github.com/vigoo/desert-moonbit"
 
 license = "Apache-2.0"
 
-keywords = [ "codegen", "serialization" ]
+keywords = [ "codegen", "serialization", "moonbit" ]
+
+preferred_target = "native"
+
+supported_targets = "+native"
 
 description = "Code generator for vigoo/desert: derives BinaryCodec implementations from #desert(binary_codec) annotations"
 

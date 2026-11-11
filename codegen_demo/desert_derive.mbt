@@ -2,9 +2,9 @@
 
 ///|
 ///
-let demoUser_desert_metadata : @desert.AdtMetadata = @desert.AdtMetadata::new([
-  @desert.InitialVersion,
-])
+let demoUser_desert_metadata : @desert.AdtMetadata = @desert.AdtMetadata::new(
+  [@desert.InitialVersion]
+)
 
 ///|
 ///
@@ -55,7 +55,8 @@ impl @desert.RegisteredValue for DemoUser with fn serialize_registered(
 
 ///|
 ///
-let demoSettings_desert_metadata : @desert.AdtMetadata = @desert.AdtMetadata::new([
+let demoSettings_desert_metadata : @desert.AdtMetadata = @desert.AdtMetadata::new(
+  [
     @desert.InitialVersion,
     @desert.FieldAdded("theme"),
     @desert.FieldMadeOptional("nickname"),
@@ -92,11 +93,12 @@ impl @desert.BinaryDeserializer for DemoSettings with fn deserialize(ctx) {
 ///
 impl @desert.BinarySerializer for DemoShape with fn serialize(self, ctx) {
   ctx.write_u8(b'\x00')
-  let idx : Int32 = match self {
+  let idx :Int32 = match self {
     Circle(_) => 0
     Point => 1
-    Hidden(_) =>
-      raise @desert.SerializingTransientConstructor("DemoShape.Hidden")
+    Hidden(_) => {
+      raise  @desert.SerializingTransientConstructor("DemoShape.Hidden")
+    }
   }
   ctx.write_var_u32(idx.reinterpret_as_uint())
   match self {
@@ -104,8 +106,9 @@ impl @desert.BinarySerializer for DemoShape with fn serialize(self, ctx) {
       ctx.write_u8(b'\x00')
       @desert.BinarySerializer::serialize(f0, ctx)
     }
-    Hidden(_) =>
-      raise @desert.SerializingTransientConstructor("DemoShape.Hidden")
+    Hidden(_) => {
+      raise  @desert.SerializingTransientConstructor("DemoShape.Hidden")
+    }
     Point => ctx.write_u8(b'\x00')
   }
 }
@@ -115,7 +118,7 @@ impl @desert.BinarySerializer for DemoShape with fn serialize(self, ctx) {
 impl @desert.BinaryDeserializer for DemoShape with fn deserialize(ctx) {
   let enum_stored = ctx.read_u8().to_int()
   if enum_stored != 0 {
-    raise @desert.DeserializationFailure(
+    raise  @desert.DeserializationFailure(
       "Enum \"DemoShape\" was written with container evolution, which this codec does not support",
     )
   }
@@ -124,7 +127,7 @@ impl @desert.BinaryDeserializer for DemoShape with fn deserialize(ctx) {
     0 => {
       let case_stored = ctx.read_u8().to_int()
       if case_stored != 0 {
-        raise @desert.DeserializationFailure(
+        raise  @desert.DeserializationFailure(
           "Case \"Circle\" was written with evolution steps, which this codec does not support",
         )
       }
@@ -133,12 +136,13 @@ impl @desert.BinaryDeserializer for DemoShape with fn deserialize(ctx) {
     1 => {
       let case_stored = ctx.read_u8().to_int()
       if case_stored != 0 {
-        raise @desert.DeserializationFailure(
+        raise  @desert.DeserializationFailure(
           "Case \"Point\" was written with evolution steps, which this codec does not support",
         )
       }
       Point
     }
-    other => raise @desert.InvalidConstructorId(other, "DemoShape")
+    other => raise  @desert.InvalidConstructorId(other, "DemoShape")
   }
 }
+

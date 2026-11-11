@@ -19,8 +19,10 @@ repository = "https://github.com/vigoo/desert-moonbit"
 
 license = "Apache-2.0"
 
-keywords = [ "serialization", "binary", "codec", "evolution" ]
+keywords = [ "serialization", "binary", "codec", "evolution", "moonbit" ]
 
 preferred_target = "wasm-gc"
+
+supported_targets = "+wasm+wasm-gc+js+native"
 
 description = "Binary serialization with schema evolution, wire-compatible with desert (Scala) and desert-rust"
